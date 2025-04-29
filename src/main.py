@@ -29,15 +29,13 @@ def make_predictions(config):
         ##makes features
         df_sales['sales_lag_12'] = df_sales.groupby("item_id")['sales'].shift(12)
 
-        df_sales['sales_mean_last_12'] = df_sales.groupby("item_id")['sales'].rolling(12).mean()
+        df_sales['sales_mean_last_12'] = df_sales.groupby("item_id")['sales'].rolling(12).mean().shift(1).dropna()
 
-        df_sales['sales_last_1_3'] = df_sales.groupby("item_id")['sales'].rolling(3).sum().shift(1)
-        df_sales['sales_last_13_15'] = df_sales.groupby("item_id")['sales'].rolling(3).sum().shift(13)
+        df_sales['sales_last_1_3'] = df_sales.groupby("item_id")['sales'].rolling(3).sum().shift(1).dropna()
+        df_sales['sales_last_13_15'] = df_sales.groupby("item_id")['sales'].rolling(3).sum().shift(13).dropna()
 
         df_sales['sales_growth'] = (df_sales["sales_last_1_3"] / df_sales["sales_last_13_15"]) * df_sales[
             "sales_lag_12"]
-
-
 
         X = df_sales[["sales_lag_12", "sales_growth", 'sales_mean_last_12']]
         y = df_sales["sales"]
@@ -51,7 +49,7 @@ def make_predictions(config):
         df_sales['prediction'] = ridge.predict(df_sales['sales']).dropna()
 
         df_sales = df_sales[df_sales["dates"] >= config["start_test"]].reset_index(drop=True)
-        #inference
+        # inference
         print(df_sales)
 
         return df_sales[["dates", "item_id", "prediction"]]
