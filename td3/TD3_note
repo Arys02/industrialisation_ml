@@ -3,3 +3,18 @@ SentimentModel.preprocess est beaucoup trop long,
 2025-05-02 11:21:47,848 - root - INFO - 'SentimentModel.preprocess' exécutée en 8401.72 ms
 
 test_case_2:
+2025-05-02 11:25:38,673 - root - INFO - SentimentAnalizer: Analyse result : ${'text': "I don't not like this product.", 'sentiment': 'neutral', 'score': 0.3730520159469219, 'processed_tokens': 6}
+la phrase est sensé être plus positive que ça avec la double négation, sur le log on remarque
+que y a un soucis, et que le score est incorrect. à creuser sur comment le score est calculé, problème de model ?
+
+test_case_3:
+2025-05-02 11:39:07,101 - root - WARNING - SentimentModel : Tokenizing with special chars $This is the best naïve implementation I've seen.
+2025-05-02 11:39:07,101 - root - ERROR - - Error while analizing text
+
+on remarque que le problème se fait juste au moment de la tokenization avec un token special. en regardant le code, on peux voir qu'il y a un chiffre / 0
+
+test_case_4:
+2025-05-02 11:46:35,591 - root - INFO - SentimentAnalizer: Analyse result : ${'text': 'Not the best design but an exclusive deal makes it worth it.', 'sentiment': 'very positive', 'score': 1.0, 'processed_tokens': 12}
+il y a un problème sur comment son analisé les séquences. "not the best" ne devrai pas être noté comme 'very positive'
+
+

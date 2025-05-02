@@ -91,10 +91,11 @@ class SentimentModel:
         return tokens
     
     def _tokenize_with_special_chars(self, text):
+        logging.warning(f"SentimentModel : Tokenizing with special chars ${text}")
         result = []
         for char in text:
             if ord(char) > 127:
-                x = 1/0
+                x = 1
             result.append(char.lower())
         return ''.join(result).split()
     
