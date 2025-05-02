@@ -58,7 +58,7 @@ def test_normal_cases():
 
     assert status_codes == [200] * len(texts)
 
-def test_case_1():
+def tst_case_1():
     texts = [
         "The product-A123B456 has really good battery life.",
         "I bought the model X100_Z200 and it's fantastic.",
@@ -70,7 +70,7 @@ def test_case_1():
     
     assert avg_time < 1.
 
-def tst_case_2():
+def test_case_2():
     texts = [
         "I don't not like this product.",
         "There's never not a reason to buy this.",

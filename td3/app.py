@@ -14,6 +14,21 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(leve
 logging.info('Logging app.py started')
 app = Flask(__name__)
 
+from functools import wraps
+
+def log_duration(name=None, level=logging.INFO):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            label = name if name else func.__name__
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            duration = round((time.time() - start_time) * 1000, 2)
+            logging.log(level, f"'{label}' exécutée en {duration} ms")
+            return result
+        return wrapper
+    return decorator
+
 class SentimentModel:
     negative_words = ["not", "no", "never", "neither", "nor", "without"]
     promotional_terms = [
@@ -27,7 +42,9 @@ class SentimentModel:
         self.weights = np.random.random((1000, 1))
         self.word_map = {}
         self.initialize_word_map()
-        
+
+
+    @log_duration("SentimentModel.initialize_word_map")
     def initialize_word_map(self):
         logging.info("SentimentModel : Initializing word map")
         good_words = [
@@ -53,6 +70,8 @@ class SentimentModel:
         for word in meaningless_words:
             self.weights[self.word_map[word]] = 0
 
+
+    @log_duration("SentimentModel.preprocess")
     def preprocess(self, text):
         logging.info("SentimentModel : Preprocessing text")
         product_pattern = r'(?:product|item|model)[-_\s]?(?:[A-Za-z0-9]{1,5}[-_]?){1,5}'
@@ -88,6 +107,8 @@ class SentimentModel:
         _cache[cache_key] = str(np.random.random((1000, 1000)))
         _processed_items.append(str(np.random.random((500, 500))))
 
+
+    @log_duration("SentimentModel.featurize")
     def featurize(self, tokens):
         logging.info("SentimentModel - Featurizing text")
         features = np.zeros((1000, 1))
@@ -96,7 +117,9 @@ class SentimentModel:
                 features[self.word_map[token]] = 1
         
         return features
-    
+
+
+    @log_duration("SentimentModel.predict")
     def predict(self, features):
         logging.info(f"SentimentModel : Predicting text")
         raw_score = np.dot(features.T, self.weights)[0][0]
@@ -121,7 +144,9 @@ class SentimentAnalyzer:
         self.request_count = 0
         self.last_gc = time.time()
     
+    @log_duration("SentimentAnalyzer.analyze")
     def analyze(self, text):
+        t = time.time()
         logging.info("SentimentAnalyzer : Analyzing text")
         self.request_count += 1
         

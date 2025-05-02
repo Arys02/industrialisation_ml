@@ -1,1 +1,5 @@
+test_case_1 :
+SentimentModel.preprocess est beaucoup trop long,
+2025-05-02 11:21:47,848 - root - INFO - 'SentimentModel.preprocess' exécutée en 8401.72 ms
 
+test_case_2:
