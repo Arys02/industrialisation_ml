@@ -4,7 +4,7 @@ import random
 import numpy as np
 import gc
 import threading
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, g
 import logging
 
 _cache = {}
@@ -22,14 +22,14 @@ class SentimentModel:
     promotion_words = sum((text.split() for text in promotional_terms), [])
 
     def __init__(self):
-        logging.info("Initializing sentiment model")
+        logging.info("SentimentModel : Initializing sentiment model")
         # Simulated model weights
         self.weights = np.random.random((1000, 1))
         self.word_map = {}
         self.initialize_word_map()
         
     def initialize_word_map(self):
-        logging.info("Initializing word map")
+        logging.info("SentimentModel : Initializing word map")
         good_words = [
             "good", "great", "excellent", "amazing","wonderful", "love", "best", "recommend",
         ]
@@ -54,7 +54,7 @@ class SentimentModel:
             self.weights[self.word_map[word]] = 0
 
     def preprocess(self, text):
-        logging.info("Preprocessing text")
+        logging.info("SentimentModel : Preprocessing text")
         product_pattern = r'(?:product|item|model)[-_\s]?(?:[A-Za-z0-9]{1,5}[-_]?){1,5}'
         if re.search(product_pattern, text):
             expensive_pattern = r'(?:product|item|model)[-_\s]?(?:[A-Za-z0-9]{1,5}[-_]?){1,5}(?:[A-Za-z0-9\-_\s]{0,10}){2,10}'
@@ -83,13 +83,13 @@ class SentimentModel:
         return "http" in text and ("jpg" in text or "png" in text)
 
     def _save_image(self, text):
-        logging.info("Saving image")
+        logging.info("SentimentModel : Saving image")
         cache_key = str(time.time())
         _cache[cache_key] = str(np.random.random((1000, 1000)))
         _processed_items.append(str(np.random.random((500, 500))))
 
     def featurize(self, tokens):
-        logging.info("Featurizing text")
+        logging.info("SentimentModel - Featurizing text")
         features = np.zeros((1000, 1))
         for token in tokens:
             if token in self.word_map:
@@ -98,7 +98,7 @@ class SentimentModel:
         return features
     
     def predict(self, features):
-        logging.info("Predicting text")
+        logging.info(f"SentimentModel : Predicting text")
         raw_score = np.dot(features.T, self.weights)[0][0]
         
         negative_features = [self.word_map[word] for word in self.negative_words]
@@ -111,18 +111,18 @@ class SentimentModel:
             raw_score = min(1.0, raw_score + 0.3)
         
         sentiment = max(0, min(1, raw_score))
-        logging.info("Sentiment: %d" % sentiment)
+        logging.info("SentimentModel : Predicted Sentiment: %d" % sentiment)
         return sentiment
 
 class SentimentAnalyzer:
     def __init__(self):
-        logging.info("Initializing sentiment analyzer")
+        logging.info("SentimentAnalizer : Initializing sentiment analyzer")
         self.model = SentimentModel()
         self.request_count = 0
         self.last_gc = time.time()
     
     def analyze(self, text):
-        logging.info("Analyzing text")
+        logging.info("SentimentAnalyzer : Analyzing text")
         self.request_count += 1
         
         if self.request_count % 10 == 0 and time.time() - self.last_gc > 30:
@@ -150,7 +150,7 @@ class SentimentAnalyzer:
             "score": float(sentiment_score),
             "processed_tokens": len(tokens)
         }
-        logging.info(f"Analyse result : ${result}")
+        logging.info(f"SentimentAnalizer: Analyse result : ${result}")
         return result
             
 
@@ -160,12 +160,17 @@ analyzer = SentimentAnalyzer()
 
 @app.route('/analyze', methods=['POST'])
 def analyze_sentiment():
+    logging.info("Route : Analyzing text")
+    logging.info("Route /analyze, method: %s" % request.method)
+    logging.info("Route body: %s" % request.json)
+    t = time.time()
 
     # Making this big try / except so you don't see the traceback
     try:
         data = request.get_json()
         result = analyzer.analyze(data['text'])
     except Exception:
+        logging.error("- Error while analizing text")
         return jsonify({"status": "there was an error"}), 500
     
     return jsonify(result)
@@ -173,13 +178,42 @@ def analyze_sentiment():
 @app.route('/health', methods=['GET'])
 def health_check():
     """Simple health check endpoint"""
-    return jsonify({
+    result = {
         "status": "ok",
         "memory_usage": (
             sum(len(obj) for obj in _processed_items)
             + sum(len(obj) for obj in _cache.values())
         ),
-    })
+    }
+    logging.info(f"Health check endpoint OK, ${result}")
+    return jsonify(result)
+
+@app.before_request
+def start_timer():
+    g.start_time = time.time()
+
+@app.after_request
+def log_request_info(response):
+    duration = round((time.time() - g.start_time) * 1000, 2)  # en ms
+    method = request.method
+    path = request.path
+    status_code = response.status_code
+    memory_usage = sum(len(obj) for obj in _processed_items) + sum(len(obj) for obj in _cache.values())
+
+    if duration > 1:
+        logging.warning(f"Request duration: {duration} ms is too long")
+
+    if status_code != 200:
+        logging.error(f"Request status code: {status_code} failed")
+
+    if memory_usage > 5000:
+        logging.warning(f"Request duration: {duration} ms is too long")
+
+
+    logging.info(
+        f"{method} {path} terminé en {duration} ms - status {status_code}"
+    )
+    return response
 
 if __name__ == '__main__':
     app.run(debug=False, port=5000)
