@@ -5,9 +5,14 @@ import numpy as np
 import gc
 import threading
 from flask import Flask, request, jsonify
+import logging
 
 _cache = {}
 _processed_items = []
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', filename='app.log')
+logging.info('Logging app.py started')
+app = Flask(__name__)
 
 class SentimentModel:
     negative_words = ["not", "no", "never", "neither", "nor", "without"]
@@ -17,12 +22,14 @@ class SentimentModel:
     promotion_words = sum((text.split() for text in promotional_terms), [])
 
     def __init__(self):
+        logging.info("Initializing sentiment model")
         # Simulated model weights
         self.weights = np.random.random((1000, 1))
         self.word_map = {}
         self.initialize_word_map()
         
     def initialize_word_map(self):
+        logging.info("Initializing word map")
         good_words = [
             "good", "great", "excellent", "amazing","wonderful", "love", "best", "recommend",
         ]
@@ -47,6 +54,7 @@ class SentimentModel:
             self.weights[self.word_map[word]] = 0
 
     def preprocess(self, text):
+        logging.info("Preprocessing text")
         product_pattern = r'(?:product|item|model)[-_\s]?(?:[A-Za-z0-9]{1,5}[-_]?){1,5}'
         if re.search(product_pattern, text):
             expensive_pattern = r'(?:product|item|model)[-_\s]?(?:[A-Za-z0-9]{1,5}[-_]?){1,5}(?:[A-Za-z0-9\-_\s]{0,10}){2,10}'
@@ -75,11 +83,13 @@ class SentimentModel:
         return "http" in text and ("jpg" in text or "png" in text)
 
     def _save_image(self, text):
+        logging.info("Saving image")
         cache_key = str(time.time())
         _cache[cache_key] = str(np.random.random((1000, 1000)))
         _processed_items.append(str(np.random.random((500, 500))))
 
     def featurize(self, tokens):
+        logging.info("Featurizing text")
         features = np.zeros((1000, 1))
         for token in tokens:
             if token in self.word_map:
@@ -88,6 +98,7 @@ class SentimentModel:
         return features
     
     def predict(self, features):
+        logging.info("Predicting text")
         raw_score = np.dot(features.T, self.weights)[0][0]
         
         negative_features = [self.word_map[word] for word in self.negative_words]
@@ -100,15 +111,18 @@ class SentimentModel:
             raw_score = min(1.0, raw_score + 0.3)
         
         sentiment = max(0, min(1, raw_score))
+        logging.info("Sentiment: %d" % sentiment)
         return sentiment
 
 class SentimentAnalyzer:
     def __init__(self):
+        logging.info("Initializing sentiment analyzer")
         self.model = SentimentModel()
         self.request_count = 0
         self.last_gc = time.time()
     
     def analyze(self, text):
+        logging.info("Analyzing text")
         self.request_count += 1
         
         if self.request_count % 10 == 0 and time.time() - self.last_gc > 30:
@@ -130,20 +144,23 @@ class SentimentAnalyzer:
             sentiment = "negative"
         else:
             sentiment = "very negative"
-        
-        return {
+        result = {
             "text": text,
             "sentiment": sentiment,
             "score": float(sentiment_score),
             "processed_tokens": len(tokens)
         }
+        logging.info(f"Analyse result : ${result}")
+        return result
             
 
+logging.info("Initializing Flask")
 app = Flask(__name__)
 analyzer = SentimentAnalyzer()
 
 @app.route('/analyze', methods=['POST'])
 def analyze_sentiment():
+
     # Making this big try / except so you don't see the traceback
     try:
         data = request.get_json()
