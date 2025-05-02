@@ -70,7 +70,7 @@ def tst_case_1():
     
     assert avg_time < 1.
 
-def test_case_2():
+def tst_case_2():
     texts = [
         "I don't not like this product.",
         "There's never not a reason to buy this.",
@@ -125,14 +125,14 @@ def tst_case_5():
 
     assert res["memory_usage"] < 1000
 
-def tst_case_6():
+def test_case_6():
     texts = ["Short review number " + str(i) for i in range(20)]
     results = run_test_case("Normal Cases", texts, concurrent=True)
     status_codes = [r["status_code"] for r in results]
 
     assert status_codes == [200] * len(texts)
 
-def tst_case_7():
+def test_case_7():
     texts = [
         "Le meilleur objet que j'ai jamais achete.",
         "Depuis que j'ai le modele AX412, je suis heureux",

@@ -17,4 +17,24 @@ test_case_4:
 2025-05-02 11:46:35,591 - root - INFO - SentimentAnalizer: Analyse result : ${'text': 'Not the best design but an exclusive deal makes it worth it.', 'sentiment': 'very positive', 'score': 1.0, 'processed_tokens': 12}
 il y a un problème sur comment son analisé les séquences. "not the best" ne devrai pas être noté comme 'very positive'
 
+test_case_5:
 
+2025-05-02 11:58:54,481 - root - INFO - POST /analyze terminé en 0.66 ms - status 200 - memory: $0MB
+2025-05-02 11:58:54,496 - root - INFO - POST /analyze terminé en 9.56 ms - status 200 - memory: $886MB
+2025-05-02 11:58:54,506 - root - INFO - POST /analyze terminé en 7.92 ms - status 200 - memory: $1772MB
+2025-05-02 11:58:54,516 - root - INFO - POST /analyze terminé en 8.17 ms - status 200 - memory: $2658MB
+2025-05-02 11:59:01,801 - root - INFO - POST /analyze terminé en 0.71 ms - status 200 - memory: $3544MB
+2025-05-02 11:59:01,811 - root - INFO - POST /analyze terminé en 7.62 ms - status 200 - memory: $4430MB
+2025-05-02 11:59:01,833 - root - INFO - POST /analyze terminé en 8.27 ms - status 200 - memory: $5316MB
+2025-05-02 11:59:01,843 - root - INFO - POST /analyze terminé en 7.97 ms - status 200 - memory: $6202MB
+2025-05-02 11:59:01,855 - root - INFO - GET /health terminé en 0.14 ms - status 200 - memory: $7088MB
+en analysant les logs, on peux remarquer un memory leak. une des solutions serai de clear régulièrement le cache,
+ou en tout cas d'avoir une taille max
+
+
+test_case_6 : pas d'erreur ?
+
+
+test_case_7 :
+2025-05-02 12:07:29,688 - root - INFO - SentimentAnalizer: Analyse result : ${'text': "Depuis que j'ai le modele AX412, je suis heureux", 'sentiment': 'negative', 'score': 0.3, 'processed_tokens': 9}
+problème au niveau du sentiment analizer qui se trompe sur l'analyse

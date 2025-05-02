@@ -24,7 +24,9 @@ def log_duration(name=None, level=logging.INFO):
             start_time = time.time()
             result = func(*args, **kwargs)
             duration = round((time.time() - start_time) * 1000, 2)
-            logging.log(level, f"'{label}' exécutée en {duration} ms")
+            memory = sum(len(obj) for obj in _processed_items) + sum(len(obj) for obj in _cache.values())
+            logging.log(level, f"'{label}' exécutée en {duration} ms, with  {memory} MB")
+            logging.log
             return result
         return wrapper
     return decorator
@@ -237,7 +239,7 @@ def log_request_info(response):
 
 
     logging.info(
-        f"{method} {path} terminé en {duration} ms - status {status_code}"
+        f"{method} {path} terminé en {duration} ms - status {status_code} - memory: ${memory_usage}MB"
     )
     return response
 
