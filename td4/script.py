@@ -26,8 +26,8 @@ _cache = {}
 def get_data():
     tmp_user_data = pd.read_csv(FOLDER / "user_data.csv")
     tmp_page_data = pd.read_csv(FOLDER / "page_data.csv")
-    tmp_bid_data = pd.read_csv(FOLDER / "bid_requests.csv")
-    tmp_click_data = pd.read_csv(FOLDER / "click_data.csv")
+    tmp_bid_data = pd.read_csv(FOLDER / "bid_requests_train.csv")
+    tmp_click_data = pd.read_csv(FOLDER / "click_data_train.csv")
     
     _cache["user_data"] = tmp_user_data
     _cache["page_data"] = tmp_page_data
