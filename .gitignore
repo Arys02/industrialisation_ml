@@ -1,2 +1,7 @@
 *~
 *.pyc
+*.csv
+td4/models/*
+td4/logs/*
+td4/data/*
+.idea
