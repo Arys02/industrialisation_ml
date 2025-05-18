@@ -17,4 +17,4 @@ LOGS_DIR = PROJ_ROOT / "logs"
 LOGS_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 
-
+MODEL_DIR = PROJ_ROOT / "models"
