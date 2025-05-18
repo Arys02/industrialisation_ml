@@ -10,7 +10,7 @@ from td4.pipeline.preprocessing import preprocess_text
 
 from sklearn.linear_model import LogisticRegression
 
-from td4.config import MODEL_DIR
+from td4.utils.config import MODEL_DIR
 from td4.utils.ClusterParameters import ClusterParameters
 
 

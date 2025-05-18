@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from td4.config import RAW_DATA_DIR
+from td4.utils.config import RAW_DATA_DIR
 
 
 def get_data(cache=None):

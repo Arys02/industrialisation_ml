@@ -1,7 +1,7 @@
 import logging
 import warnings
 
-from td4.config import *
+from td4.utils.config import *
 from td4.pipeline.clustering import clusterize_users, clusterize_pages
 from td4.pipeline.dataset import get_data
 from td4.pipeline.models import train_page_cluster_predictor, train_click_predictor, save_models, \
